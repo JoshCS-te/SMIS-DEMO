@@ -1,0 +1,554 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<script>
+(function(){
+  if (sessionStorage.getItem('nemsec_demo_dashboard') !== 'dashboard-master-admin.html') {
+    window.location.replace('sign-in.html');
+  }
+})();
+</script>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Master Administrator — NEMSEC Demo</title>
+<meta name="robots" content="noindex, nofollow" />
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Sora:wght@500;600;700;800&family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --cream: #FFF8EC; --plum: #2D1B3D; --plum-dim: #6B5A7A; --plum-faint:#A599B2;
+    --coral: #FF6B4A; --coral-dark: #E5502F; --sun: #FFC93C; --grass: #3CB878; --sky:#4AB8FF;
+    --border:#EAE2D4; --card:#FFFFFF;
+    --font-display: 'Sora', sans-serif; --font-body: 'Manrope', sans-serif;
+  }
+  *{ box-sizing:border-box; margin:0; padding:0; }
+  body{ font-family:var(--font-body); background:var(--cream); color:var(--plum); font-size:14px; }
+  button{ font-family:inherit; cursor:pointer; }
+
+  .shell{ display:flex; min-height:100vh; }
+
+  /* ---------- Sidebar ---------- */
+  .sidebar{ width:250px; flex:none; background:var(--plum); color:#fff; display:flex; flex-direction:column; padding:22px 16px; }
+  .side-brand{ display:flex; align-items:center; gap:10px; padding:0 8px 22px; border-bottom:1px solid rgba(255,255,255,0.12); margin-bottom:18px; }
+  .side-brand img{ height:22px; filter:brightness(0) invert(1); }
+  .side-brand .school{ font-family:var(--font-display); font-weight:700; font-size:13.5px; }
+  .side-brand .system{ font-size:10.5px; color:#B7A8C4; }
+  .nav-label-group{ font-size:10.5px; font-weight:700; color:#8B7A9C; text-transform:uppercase; letter-spacing:0.05em; padding:14px 10px 6px; }
+  .nav-item{
+    display:flex; align-items:center; gap:10px; width:100%; padding:9px 10px; border-radius:9px;
+    border:none; background:none; color:#D9CFE3; font-size:13px; font-weight:600; text-align:left; margin-bottom:2px;
+  }
+  .nav-item svg{ width:16px; height:16px; flex:none; }
+  .nav-item:hover{ background:rgba(255,255,255,0.07); color:#fff; }
+  .nav-item.active{ background:var(--coral); color:#fff; }
+  .side-foot{ margin-top:auto; display:flex; align-items:center; gap:10px; padding:14px 8px 0; border-top:1px solid rgba(255,255,255,0.12); }
+  .side-avatar{ width:34px; height:34px; border-radius:9px; background:var(--coral); display:flex; align-items:center; justify-content:center; font-family:var(--font-display); font-weight:700; font-size:13px; flex:none; }
+  .side-who-name{ font-size:13px; font-weight:700; }
+  .side-who-role{ font-size:11px; color:#B7A8C4; }
+  .signout-btn{ margin-top:12px; width:100%; padding:9px 10px; border-radius:9px; border:1px solid rgba(255,255,255,0.14); background:none; color:#D9CFE3; font-size:12px; font-weight:700; text-align:left; }
+  .signout-btn:hover{ background:rgba(255,255,255,0.08); color:#fff; }
+
+  /* ---------- Main ---------- */
+  .main{ flex:1; min-width:0; }
+  .topbar{
+    background:var(--card); border-bottom:1px solid var(--border); padding:16px 32px;
+    display:flex; align-items:center; justify-content:space-between; position:sticky; top:0; z-index:5;
+  }
+  .topbar h1{ font-family:var(--font-display); font-weight:700; font-size:19px; }
+  .topbar .sub{ font-size:12.5px; color:var(--plum-dim); }
+  .demo-pill{ background:var(--sun); color:#5C4A1F; font-size:11.5px; font-weight:700; padding:5px 12px; border-radius:999px; }
+  .content{ padding:28px 32px 60px; }
+
+  /* ---------- Stat cards ---------- */
+  .stat-grid{ display:grid; grid-template-columns:repeat(4,1fr); gap:16px; margin-bottom:28px; }
+  @media (max-width:1000px){ .stat-grid{ grid-template-columns:1fr 1fr; } }
+  .stat-card{ background:var(--card); border:1px solid var(--border); border-radius:14px; padding:20px; }
+  .stat-card .icon{ width:34px; height:34px; border-radius:10px; display:flex; align-items:center; justify-content:center; margin-bottom:14px; }
+  .stat-card .num{ font-family:var(--font-display); font-weight:700; font-size:26px; }
+  .stat-card .label{ font-size:12.5px; color:var(--plum-dim); margin-top:2px; }
+  .stat-card .delta{ font-size:11.5px; font-weight:700; margin-top:8px; }
+  .stat-card .delta.up{ color:var(--grass); }
+
+  /* ---------- Panels ---------- */
+  .panel-grid{ display:grid; grid-template-columns:1.4fr 1fr; gap:20px; }
+  @media (max-width:980px){ .panel-grid{ grid-template-columns:1fr; } }
+  .panel{ background:var(--card); border:1px solid var(--border); border-radius:14px; padding:22px; margin-bottom:20px; }
+  .panel-head{ display:flex; align-items:center; justify-content:space-between; margin-bottom:16px; }
+  .panel-head h3{ font-family:var(--font-display); font-weight:700; font-size:15px; }
+  .panel-head a{ font-size:12.5px; font-weight:700; color:var(--coral-dark); text-decoration:none; }
+
+  table{ width:100%; border-collapse:collapse; font-size:13px; }
+  th{ text-align:left; font-size:11px; text-transform:uppercase; letter-spacing:0.04em; color:var(--plum-faint); padding:8px 10px; border-bottom:1.5px solid var(--border); }
+  td{ padding:11px 10px; border-bottom:1px solid var(--border); }
+  tr:last-child td{ border-bottom:none; }
+  .badge{ display:inline-flex; font-size:11px; font-weight:700; padding:4px 10px; border-radius:999px; }
+  .badge.green{ background:#E1F5EA; color:#1E7A48; }
+  .badge.yellow{ background:#FFF6DA; color:#8A6D0F; }
+  .badge.red{ background:#FBE6E3; color:#B23A22; }
+  .badge.blue{ background:#E3F3FF; color:#1D6FA8; }
+
+  .activity-row{ display:flex; gap:12px; padding:12px 0; border-bottom:1px solid var(--border); }
+  .activity-row:last-child{ border-bottom:none; }
+  .activity-dot{ width:8px; height:8px; border-radius:50%; margin-top:6px; flex:none; }
+  .activity-text{ font-size:13px; }
+  .activity-text b{ font-weight:700; }
+  .activity-time{ font-size:11.5px; color:var(--plum-faint); margin-top:2px; }
+
+  .role-mini-grid{ display:grid; grid-template-columns:1fr 1fr 1fr; gap:10px; }
+  .role-mini{ background:var(--cream); border-radius:10px; padding:12px; text-align:center; }
+  .role-mini .n{ font-family:var(--font-display); font-weight:700; font-size:18px; }
+  .role-mini .l{ font-size:10.5px; color:var(--plum-dim); margin-top:2px; }
+
+  .page{ display:none; }
+  .page.active{ display:block; }
+
+  .search-row{ display:flex; gap:10px; margin-bottom:18px; }
+  .search-row input{ flex:1; padding:10px 14px; border:1.5px solid var(--border); border-radius:9px; font-family:inherit; font-size:13px; }
+  .search-row select{ padding:10px 14px; border:1.5px solid var(--border); border-radius:9px; font-family:inherit; font-size:13px; background:#fff; }
+
+  .pill-tab-row{ display:flex; gap:8px; margin-bottom:20px; }
+
+  /* ---------- Kanban board ---------- */
+  .kanban{ display:grid; grid-template-columns:repeat(4,1fr); gap:16px; align-items:start; }
+  @media (max-width:1100px){ .kanban{ grid-template-columns:1fr 1fr; } }
+  .kanban-col{ background:var(--cream); border-radius:12px; padding:14px; }
+  .kanban-col-head{ display:flex; align-items:center; justify-content:space-between; margin-bottom:12px; padding:0 2px; }
+  .kanban-col-head h4{ font-size:12.5px; font-weight:700; text-transform:uppercase; letter-spacing:0.03em; }
+  .kanban-count{ background:#fff; border-radius:999px; font-size:11px; font-weight:700; padding:2px 9px; color:var(--plum-dim); }
+  .kanban-card{ background:#fff; border-radius:10px; padding:12px 14px; margin-bottom:10px; box-shadow:0 3px 10px -6px rgba(45,27,61,0.18); }
+  .kanban-card:last-child{ margin-bottom:0; }
+  .kanban-card .name{ font-size:13px; font-weight:700; margin-bottom:3px; }
+  .kanban-card .meta{ font-size:11.5px; color:var(--plum-dim); }
+  .kanban-col.submitted .kanban-col-head h4{ color:var(--plum-dim); }
+  .kanban-col.exam .kanban-col-head h4{ color:#8A6D0F; }
+  .kanban-col.review .kanban-col-head h4{ color:#1D6FA8; }
+  .kanban-col.decided .kanban-col-head h4{ color:#1E7A48; }
+  .pill-tab{ padding:8px 16px; border-radius:999px; border:1.5px solid var(--border); background:#fff; font-size:12.5px; font-weight:700; color:var(--plum-dim); }
+  .pill-tab.active{ background:var(--plum); color:#fff; border-color:var(--plum); }
+</style>
+</head>
+<body>
+
+<div class="shell">
+  <aside class="sidebar">
+    <div class="side-brand">
+      <img src="assets/nemsec-logo.png" alt="" />
+      <div>
+        <div class="school">GREENFIELD ACADEMY</div>
+        <a href="https://nemsec.com.ng" target="_blank" rel="noopener" class="system" style="color:inherit; text-decoration:none;">NEMSEC SMIS</a>
+      </div>
+    </div>
+
+    <nav>
+      <div class="nav-label-group">Overview</div>
+      <button class="nav-item active" data-page="overview">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="9" rx="1.5"/><rect x="14" y="3" width="7" height="5" rx="1.5"/><rect x="14" y="12" width="7" height="9" rx="1.5"/><rect x="3" y="16" width="7" height="5" rx="1.5"/></svg>
+        Dashboard
+      </button>
+
+      <div class="nav-label-group">Admissions</div>
+      <button class="nav-item" data-page="admissions">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg>
+        Application Pipeline
+      </button>
+      <button class="nav-item" data-page="examquestions">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M9.5 9a2.5 2.5 0 0 1 5 0c0 1.5-1.5 2-2 3"/><line x1="12" y1="16.5" x2="12.01" y2="16.5"/></svg>
+        Exam Questions
+      </button>
+
+      <div class="nav-label-group">People</div>
+      <button class="nav-item" data-page="students">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="7"/><path d="M21 21l-4.3-4.3"/></svg>
+        Students
+      </button>
+      <button class="nav-item" data-page="staff">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+        Staff
+      </button>
+      <button class="nav-item" data-page="parentlinks">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
+        Parent Links
+      </button>
+
+      <div class="nav-label-group">School Setup</div>
+      <button class="nav-item" data-page="classes">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/></svg>
+        Classes &amp; Terms
+      </button>
+      <button class="nav-item" data-page="roles">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
+        Roles &amp; Permissions
+      </button>
+
+      <div class="nav-label-group">Finance</div>
+      <button class="nav-item" data-page="finance">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>
+        Finance Oversight
+      </button>
+    </nav>
+
+    <div class="side-foot">
+      <div class="side-avatar">EO</div>
+      <div>
+        <div class="side-who-name">Edith Okoro</div>
+        <div class="side-who-role">Master Administrator</div>
+      </div>
+      <button class="signout-btn" id="signOutBtn">Sign Out</button>
+    </div>
+  </aside>
+
+  <div class="main">
+    <div class="topbar">
+      <div>
+        <h1 id="pageTitle">Dashboard Overview</h1>
+        <div class="sub">Greenfield Academy · 2026/2027 Session</div>
+      </div>
+      <div class="demo-pill">Demo data — not a real school</div>
+    </div>
+
+    <div class="content">
+
+      <!-- ============ OVERVIEW ============ -->
+      <section class="page active" id="page-overview">
+        <div class="stat-grid">
+          <div class="stat-card">
+            <div class="icon" style="background:#FBE6E3;"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="var(--coral-dark)" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/></svg></div>
+            <div class="num">612</div>
+            <div class="label">Total Students</div>
+            <div class="delta up">↑ 14 this term</div>
+          </div>
+          <div class="stat-card">
+            <div class="icon" style="background:#E3F3FF;"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="#1D6FA8" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg></div>
+            <div class="num">48</div>
+            <div class="label">Staff Accounts</div>
+            <div class="delta up">↑ 2 this term</div>
+          </div>
+          <div class="stat-card">
+            <div class="icon" style="background:#FFF6DA;"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="#8A6D0F" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round"><path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg></div>
+            <div class="num">27</div>
+            <div class="label">Pending Applications</div>
+            <div class="delta" style="color:var(--plum-faint);">9 awaiting exam</div>
+          </div>
+          <div class="stat-card">
+            <div class="icon" style="background:#E1F5EA;"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="#1E7A48" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg></div>
+            <div class="num">₦18.4M</div>
+            <div class="label">Fees Collected (Term)</div>
+            <div class="delta up">↑ 92% of billed</div>
+          </div>
+        </div>
+
+        <div class="panel-grid">
+          <div>
+            <div class="panel">
+              <div class="panel-head"><h3>Recent Activity</h3></div>
+              <div class="activity-row">
+                <div class="activity-dot" style="background:var(--grass);"></div>
+                <div>
+                  <div class="activity-text"><b>Chiamaka Nweke</b> was admitted into JSS2</div>
+                  <div class="activity-time">11 minutes ago</div>
+                </div>
+              </div>
+              <div class="activity-row">
+                <div class="activity-dot" style="background:var(--sky);"></div>
+                <div>
+                  <div class="activity-text"><b>Mr. Adewale Ibrahim</b> published Grade 4 report cards</div>
+                  <div class="activity-time">1 hour ago</div>
+                </div>
+              </div>
+              <div class="activity-row">
+                <div class="activity-dot" style="background:var(--sun);"></div>
+                <div>
+                  <div class="activity-text"><b>Tobi Adeyemi</b>'s parent paid Term 2 tuition — ₦85,000</div>
+                  <div class="activity-time">3 hours ago</div>
+                </div>
+              </div>
+              <div class="activity-row">
+                <div class="activity-dot" style="background:var(--coral);"></div>
+                <div>
+                  <div class="activity-text">New entrance exam question added for SS1</div>
+                  <div class="activity-time">Yesterday, 4:12 PM</div>
+                </div>
+              </div>
+              <div class="activity-row">
+                <div class="activity-dot" style="background:var(--grass);"></div>
+                <div>
+                  <div class="activity-text"><b>Blessing Okon</b> was admitted into KG2</div>
+                  <div class="activity-time">Yesterday, 10:05 AM</div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div>
+            <div class="panel">
+              <div class="panel-head"><h3>Accounts by Role</h3></div>
+              <div class="role-mini-grid">
+                <div class="role-mini"><div class="n">612</div><div class="l">Students</div></div>
+                <div class="role-mini"><div class="n">584</div><div class="l">Parents</div></div>
+                <div class="role-mini"><div class="n">31</div><div class="l">Teachers</div></div>
+                <div class="role-mini"><div class="n">9</div><div class="l">Class Teachers</div></div>
+                <div class="role-mini"><div class="n">4</div><div class="l">Admin Staff</div></div>
+                <div class="role-mini"><div class="n">27</div><div class="l">Applicants</div></div>
+              </div>
+            </div>
+            <div class="panel">
+              <div class="panel-head"><h3>This Week</h3></div>
+              <div class="activity-row"><div class="activity-dot" style="background:var(--grass);"></div><div class="activity-text">6 new admissions</div></div>
+              <div class="activity-row"><div class="activity-dot" style="background:var(--sky);"></div><div class="activity-text">3 entrance exams scheduled</div></div>
+              <div class="activity-row"><div class="activity-dot" style="background:var(--sun);"></div><div class="activity-text">₦2.1M in fees received</div></div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ============ ADMISSIONS ============ -->
+      <section class="page" id="page-admissions">
+        <div class="kanban">
+          <div class="kanban-col submitted">
+            <div class="kanban-col-head"><h4>Submitted</h4><span class="kanban-count">9</span></div>
+            <div class="kanban-card"><div class="name">Ngozi Ekwueme</div><div class="meta">Grade 2 · 3 Sep 2026</div></div>
+            <div class="kanban-card"><div class="name">Yusuf Danjuma</div><div class="meta">JSS1 · 3 Sep 2026</div></div>
+            <div class="kanban-card"><div class="name">Precious Etim</div><div class="meta">KG2 · 2 Sep 2026</div></div>
+            <div class="kanban-card"><div class="name">Chukwuemeka Nnaji</div><div class="meta">Nursery 1 · 2 Sep 2026</div></div>
+          </div>
+          <div class="kanban-col exam">
+            <div class="kanban-col-head"><h4>Exam Scheduled</h4><span class="kanban-count">6</span></div>
+            <div class="kanban-card"><div class="name">Ifeoma Chukwu</div><div class="meta">JSS1 · 2 Sep 2026, 10:00 AM</div></div>
+            <div class="kanban-card"><div class="name">Grace Effiong</div><div class="meta">Nursery 2 · 5 Sep 2026, 9:00 AM</div></div>
+            <div class="kanban-card"><div class="name">Michael Osei</div><div class="meta">SS1 · 5 Sep 2026, 11:00 AM</div></div>
+          </div>
+          <div class="kanban-col review">
+            <div class="kanban-col-head"><h4>Under Review</h4><span class="kanban-count">8</span></div>
+            <div class="kanban-card"><div class="name">David Okafor</div><div class="meta">Grade 3 · Exam scored 78%</div></div>
+            <div class="kanban-card"><div class="name">Tunde Bakare</div><div class="meta">SS2 · Exam scored 65%</div></div>
+            <div class="kanban-card"><div class="name">Samuel Adeoye</div><div class="meta">SS1 · Exam scored 71%</div></div>
+          </div>
+          <div class="kanban-col decided">
+            <div class="kanban-col-head"><h4>Decided</h4><span class="kanban-count">4</span></div>
+            <div class="kanban-card"><div class="name">Amara Eze</div><div class="meta">KG1 · <span class="badge green">Admitted</span></div></div>
+            <div class="kanban-card"><div class="name">Halima Bello</div><div class="meta">Grade 1 · <span class="badge green">Admitted</span></div></div>
+            <div class="kanban-card"><div class="name">Emeka Obi</div><div class="meta">JSS3 · <span class="badge red">Declined</span></div></div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ============ STUDENTS ============ -->
+      <section class="page" id="page-students">
+        <div class="search-row">
+          <input type="text" placeholder="Search students by name or admission number..." />
+          <select><option>All Classes</option><option>JSS1</option><option>JSS2</option><option>Grade 3</option></select>
+        </div>
+        <div class="panel">
+          <table>
+            <thead><tr><th>Name</th><th>Admission No.</th><th>Class</th><th>Status</th></tr></thead>
+            <tbody>
+              <tr><td>Chiamaka Nweke</td><td>GFA/2026/0412</td><td>JSS2</td><td><span class="badge green">Active</span></td></tr>
+              <tr><td>Tobi Adeyemi</td><td>GFA/2024/0198</td><td>Grade 5</td><td><span class="badge green">Active</span></td></tr>
+              <tr><td>Blessing Okon</td><td>GFA/2026/0413</td><td>KG2</td><td><span class="badge green">Active</span></td></tr>
+              <tr><td>Fatima Abubakar</td><td>GFA/2023/0087</td><td>SS3</td><td><span class="badge green">Active</span></td></tr>
+              <tr><td>Kelechi Igwe</td><td>GFA/2025/0301</td><td>JSS1</td><td><span class="badge green">Active</span></td></tr>
+              <tr><td>Zainab Suleiman</td><td>GFA/2022/0044</td><td>SS2</td><td><span class="badge yellow">On Leave</span></td></tr>
+            </tbody>
+          </table>
+        </div>
+      </section>
+
+      <!-- ============ STAFF ============ -->
+      <section class="page" id="page-staff">
+        <div class="search-row">
+          <input type="text" placeholder="Search staff by name or email..." />
+          <select><option>All Roles</option><option>Teacher</option><option>Class Teacher</option><option>Admin Staff</option></select>
+        </div>
+        <div class="panel">
+          <table>
+            <thead><tr><th>Name</th><th>Role</th><th>Email</th><th>Status</th></tr></thead>
+            <tbody>
+              <tr><td>Adewale Ibrahim</td><td>Class Teacher — Grade 4</td><td>a.ibrahim@greenfield.edu.ng</td><td><span class="badge green">Active</span></td></tr>
+              <tr><td>Ngozi Umeh</td><td>Teacher — Mathematics</td><td>n.umeh@greenfield.edu.ng</td><td><span class="badge green">Active</span></td></tr>
+              <tr><td>Chidi Onyekachi</td><td>Admissions Officer</td><td>c.onyekachi@greenfield.edu.ng</td><td><span class="badge green">Active</span></td></tr>
+              <tr><td>Rita Anyanwu</td><td>Finance Officer</td><td>r.anyanwu@greenfield.edu.ng</td><td><span class="badge green">Active</span></td></tr>
+              <tr><td>Segun Fashola</td><td>IT Officer</td><td>s.fashola@greenfield.edu.ng</td><td><span class="badge green">Active</span></td></tr>
+              <tr><td>Patience Effiong</td><td>Teacher — English</td><td>p.effiong@greenfield.edu.ng</td><td><span class="badge yellow">On Leave</span></td></tr>
+            </tbody>
+          </table>
+        </div>
+      </section>
+
+      <!-- ============ FINANCE ============ -->
+      <section class="page" id="page-finance">
+        <div class="stat-grid" style="grid-template-columns:repeat(3,1fr);">
+          <div class="stat-card">
+            <div class="num">₦20.0M</div>
+            <div class="label">Total Billed (Term)</div>
+          </div>
+          <div class="stat-card">
+            <div class="num" style="color:var(--grass);">₦18.4M</div>
+            <div class="label">Collected</div>
+          </div>
+          <div class="stat-card">
+            <div class="num" style="color:var(--coral-dark);">₦1.6M</div>
+            <div class="label">Outstanding</div>
+          </div>
+        </div>
+        <div class="panel">
+          <div class="panel-head"><h3>Recent Payments</h3></div>
+          <table>
+            <thead><tr><th>Student</th><th>Amount</th><th>Category</th><th>Date</th></tr></thead>
+            <tbody>
+              <tr><td>Tobi Adeyemi</td><td>₦85,000</td><td>Tuition</td><td>Today, 1:40 PM</td></tr>
+              <tr><td>Chiamaka Nweke</td><td>₦92,000</td><td>Tuition + Transport</td><td>Today, 10:12 AM</td></tr>
+              <tr><td>Fatima Abubakar</td><td>₦110,000</td><td>Tuition + Boarding</td><td>Yesterday, 3:55 PM</td></tr>
+              <tr><td>Kelechi Igwe</td><td>₦78,000</td><td>Tuition</td><td>Yesterday, 9:20 AM</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </section>
+
+      <!-- ============ EXAM QUESTIONS ============ -->
+      <section class="page" id="page-examquestions">
+        <div class="search-row">
+          <input type="text" placeholder="Search questions..." />
+          <select><option>All Classes</option><option>JSS2</option><option>SS1</option><option>Grade 3</option></select>
+        </div>
+        <div class="panel-grid">
+          <div>
+            <div class="panel">
+              <div class="panel-head"><h3>JSS2 — Mathematics</h3><span class="badge blue">14 questions</span></div>
+              <table>
+                <thead><tr><th>Question</th><th>Options</th></tr></thead>
+                <tbody>
+                  <tr><td>What is 7 × 8?</td><td>54, 56, 58, 60</td></tr>
+                  <tr><td>Simplify: 3(x + 2)</td><td>3x+2, 3x+6, x+6, 3x+5</td></tr>
+                  <tr><td>Find the LCM of 4 and 6</td><td>10, 12, 24, 8</td></tr>
+                </tbody>
+              </table>
+            </div>
+            <div class="panel">
+              <div class="panel-head"><h3>SS1 — English Language</h3><span class="badge blue">21 questions</span></div>
+              <table>
+                <thead><tr><th>Question</th><th>Options</th></tr></thead>
+                <tbody>
+                  <tr><td>Choose the correct synonym for "diligent"</td><td>Lazy, Hardworking, Slow, Careless</td></tr>
+                  <tr><td>Identify the adverb in: "She sang beautifully."</td><td>She, sang, beautifully, .</td></tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+          <div>
+            <div class="panel">
+              <div class="panel-head"><h3>Question Bank Summary</h3></div>
+              <div class="role-mini-grid">
+                <div class="role-mini"><div class="n">9</div><div class="l">Classes covered</div></div>
+                <div class="role-mini"><div class="n">187</div><div class="l">Total questions</div></div>
+                <div class="role-mini"><div class="n">6</div><div class="l">Scheduled exams</div></div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ============ PARENT LINKS ============ -->
+      <section class="page" id="page-parentlinks">
+        <div class="search-row">
+          <input type="text" placeholder="Search by parent or student name..." />
+        </div>
+        <div class="panel">
+          <table>
+            <thead><tr><th>Parent</th><th>Linked Student(s)</th><th>Phone</th><th>Status</th></tr></thead>
+            <tbody>
+              <tr><td>Ifeoma Nweke</td><td>Chiamaka Nweke (JSS2)</td><td>0803 XXX 4521</td><td><span class="badge green">Verified</span></td></tr>
+              <tr><td>Bola Adeyemi</td><td>Tobi Adeyemi (Grade 5)</td><td>0705 XXX 8834</td><td><span class="badge green">Verified</span></td></tr>
+              <tr><td>Grace Okon</td><td>Blessing Okon (KG2)</td><td>0906 XXX 1120</td><td><span class="badge yellow">Pending Verification</span></td></tr>
+              <tr><td>Musa Abubakar</td><td>Fatima Abubakar (SS3)</td><td>0813 XXX 6602</td><td><span class="badge green">Verified</span></td></tr>
+              <tr><td>Chinedu Igwe</td><td>Kelechi Igwe (JSS1)</td><td>0701 XXX 9945</td><td><span class="badge green">Verified</span></td></tr>
+            </tbody>
+          </table>
+        </div>
+      </section>
+
+      <!-- ============ CLASSES & TERMS ============ -->
+      <section class="page" id="page-classes">
+        <div class="stat-grid" style="grid-template-columns:repeat(3,1fr);">
+          <div class="stat-card"><div class="num">16</div><div class="label">Classes, Creche to SS3</div></div>
+          <div class="stat-card"><div class="num">2026/2027</div><div class="label">Active Session</div></div>
+          <div class="stat-card"><div class="num" style="color:var(--grass);">First Term</div><div class="label">Currently Running</div></div>
+        </div>
+        <div class="panel">
+          <div class="panel-head"><h3>Classes</h3></div>
+          <table>
+            <thead><tr><th>Class</th><th>Class Teacher</th><th>Students</th></tr></thead>
+            <tbody>
+              <tr><td>Creche</td><td>Mrs. Funke Bello</td><td>18</td></tr>
+              <tr><td>Nursery 1</td><td>Mrs. Amaka Nwosu</td><td>22</td></tr>
+              <tr><td>KG2</td><td>Mr. Emeka Duru</td><td>24</td></tr>
+              <tr><td>Grade 4</td><td>Mr. Adewale Ibrahim</td><td>29</td></tr>
+              <tr><td>JSS2</td><td>Mrs. Patience Effiong</td><td>34</td></tr>
+              <tr><td>SS1</td><td>Mr. Tunde Salako</td><td>31</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </section>
+
+      <!-- ============ ROLES & PERMISSIONS ============ -->
+      <section class="page" id="page-roles">
+        <div class="panel">
+          <div class="panel-head"><h3>System Roles</h3></div>
+          <table>
+            <thead><tr><th>Role</th><th>Accounts</th><th>Access Level</th></tr></thead>
+            <tbody>
+              <tr><td>Master Administrator</td><td>1</td><td><span class="badge red">Full System Access</span></td></tr>
+              <tr><td>Administrator</td><td>2</td><td><span class="badge blue">Operations</span></td></tr>
+              <tr><td>Admissions Officer</td><td>1</td><td><span class="badge blue">Admissions Only</span></td></tr>
+              <tr><td>Finance Officer</td><td>1</td><td><span class="badge blue">Finance Only</span></td></tr>
+              <tr><td>IT Officer</td><td>1</td><td><span class="badge blue">Account Administration</span></td></tr>
+              <tr><td>Teacher</td><td>31</td><td><span class="badge green">Own Classes Only</span></td></tr>
+              <tr><td>Class Teacher</td><td>9</td><td><span class="badge green">Own Class + Report Cards</span></td></tr>
+              <tr><td>Parent</td><td>584</td><td><span class="badge yellow">Own Child Only</span></td></tr>
+              <tr><td>Student</td><td>612</td><td><span class="badge yellow">Own Record Only</span></td></tr>
+            </tbody>
+          </table>
+        </div>
+      </section>
+
+      <div style="margin-top:36px; padding-top:20px; border-top:1px solid var(--border); font-size:12px; color:var(--plum-faint);">
+        © 2026 <a href="https://nemsec.com.ng" target="_blank" rel="noopener" style="color:inherit; text-decoration:underline;">NEMSEC</a>. All rights reserved. This is a demonstration site with sample data — not a real school.
+      </div>
+
+    </div>
+  </div>
+</div>
+
+<script>
+document.querySelectorAll('.nav-item[data-page]').forEach(btn => {
+  btn.addEventListener('click', () => {
+    document.querySelectorAll('.nav-item[data-page]').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+    document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+    document.getElementById('page-' + btn.dataset.page).classList.add('active');
+    const titles = {
+      overview: 'Dashboard Overview', admissions: 'Application Pipeline',
+      students: 'Students', staff: 'Staff', finance: 'Finance Oversight',
+      examquestions: 'Exam Questions', parentlinks: 'Parent Links',
+      classes: 'Classes & Terms', roles: 'Roles & Permissions',
+    };
+    document.getElementById('pageTitle').textContent = titles[btn.dataset.page];
+  });
+});
+
+document.querySelectorAll('.pill-tab').forEach(tab => {
+  tab.addEventListener('click', () => {
+    document.querySelectorAll('.pill-tab').forEach(t => t.classList.remove('active'));
+    tab.classList.add('active');
+  });
+});
+
+document.getElementById('signOutBtn').addEventListener('click', () => {
+  sessionStorage.removeItem('nemsec_demo_role');
+  sessionStorage.removeItem('nemsec_demo_dashboard');
+  window.location.href = 'sign-in.html';
+});
+</script>
+
+</body>
+</html>

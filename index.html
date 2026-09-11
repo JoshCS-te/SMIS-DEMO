@@ -1,0 +1,434 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>NEMSEC — School Management, Built for One School at a Time</title>
+<meta name="description" content="NEMSEC is a complete school management platform — admissions, attendance, report cards, and fees, in one place, built for how your school actually runs." />
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Sora:wght@500;600;700;800&family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --cream: #FFF8EC;
+    --cream-dim: #FFF1DA;
+    --plum: #2D1B3D;
+    --plum-dim: #6B5A7A;
+    --coral: #FF6B4A;
+    --coral-dark: #E5502F;
+    --sun: #FFC93C;
+    --grass: #3CB878;
+    --grass-dark: #2C9862;
+    --sky: #4AB8FF;
+    --white: #FFFFFF;
+    --font-display: 'Sora', sans-serif;
+    --font-body: 'Manrope', sans-serif;
+  }
+  *{ box-sizing:border-box; margin:0; padding:0; }
+  html{ scroll-behavior:smooth; }
+  body{
+    font-family: var(--font-body); background: var(--cream); color: var(--plum);
+    font-size:16px; line-height:1.6; overflow-x:hidden;
+  }
+  a{ color:inherit; }
+  img,svg{ display:block; max-width:100%; }
+  .wrap{ max-width:1160px; margin:0 auto; padding:0 32px; }
+
+  /* ---------- Reveal-on-scroll ---------- */
+  .reveal{ opacity:0; transform:translateY(24px); transition:opacity 0.6s cubic-bezier(.2,.8,.2,1), transform 0.6s cubic-bezier(.2,.8,.2,1); }
+  .reveal.in{ opacity:1; transform:translateY(0); }
+  @media (prefers-reduced-motion: reduce){ .reveal{ opacity:1; transform:none; } }
+
+  /* ---------- Nav ---------- */
+  .nav{
+    display:flex; align-items:center; justify-content:space-between; padding:22px 0;
+    position:sticky; top:0; background:rgba(255,248,236,0.92); backdrop-filter:blur(8px); z-index:20;
+  }
+  .wordmark{ display:flex; align-items:center; gap:10px; text-decoration:none; color:var(--plum); font-family:var(--font-display); font-weight:700; font-size:21px; }
+  .wordmark img{ height:26px; }
+  .nav-links{ display:flex; align-items:center; gap:34px; font-size:15px; font-weight:600; }
+  .nav-links a{ text-decoration:none; color:var(--plum-dim); transition:color 0.15s; }
+  .nav-links a:hover{ color:var(--coral); }
+  .btn{
+    display:inline-flex; align-items:center; gap:8px; font-family:var(--font-body); font-weight:700;
+    font-size:15px; padding:13px 26px; border-radius:999px; text-decoration:none; border:none; cursor:pointer;
+    transition:transform 0.15s cubic-bezier(.3,1.5,.5,1), box-shadow 0.15s;
+  }
+  .btn:active{ transform:scale(0.95); }
+  .btn-coral{ background:var(--coral); color:#fff; box-shadow:0 8px 20px -6px rgba(255,107,74,0.55); }
+  .btn-coral:hover{ background:var(--coral-dark); transform:translateY(-2px); }
+  .btn-outline{ border:2px solid var(--plum); color:var(--plum); background:none; }
+  .btn-outline:hover{ background:var(--plum); color:var(--cream); }
+  @media (max-width:780px){ .nav-links{ display:none; } }
+
+  /* ---------- Hero ---------- */
+  .hero{ position:relative; padding:70px 0 60px; overflow:hidden; }
+  .hero-student{
+    position:absolute; bottom:-10px; left:1%; width:200px; z-index:1; opacity:0;
+    animation: riseIn 0.8s ease forwards 0.4s;
+  }
+  @keyframes riseIn{ from{ opacity:0; transform:translateY(30px); } to{ opacity:1; transform:translateY(0); } }
+  @media (max-width:1150px){ .hero-student{ display:none; } }
+  @media (prefers-reduced-motion: reduce){ .hero-student{ animation:none; opacity:1; } }
+  .hero-inner{ display:grid; grid-template-columns:1fr 1fr; gap:56px; align-items:center; position:relative; z-index:2; }
+  @media (max-width:900px){ .hero-inner{ grid-template-columns:1fr; } }
+
+  .hero-eyebrow{
+    display:inline-flex; align-items:center; gap:8px; background:var(--white); border-radius:999px;
+    padding:8px 16px; font-size:13.5px; font-weight:700; color:var(--coral-dark); margin-bottom:22px;
+    box-shadow:0 4px 14px -6px rgba(45,27,61,0.15);
+  }
+  .hero h1{
+    font-family:var(--font-display); font-weight:700; font-size:clamp(36px,5vw,58px);
+    line-height:1.08; margin-bottom:22px;
+  }
+  .hero h1 .hl{ color:var(--coral); position:relative; }
+  .hero p{ font-size:18px; color:var(--plum-dim); max-width:42ch; margin-bottom:30px; }
+  .hero-actions{ display:flex; gap:14px; flex-wrap:wrap; }
+
+  .floaty{ position:absolute; animation: bob 5s ease-in-out infinite; opacity:0.9; }
+  @keyframes bob{ 0%,100%{ transform:translateY(0) rotate(0deg); } 50%{ transform:translateY(-16px) rotate(6deg); } }
+  @media (prefers-reduced-motion: reduce){ .floaty{ animation:none; } }
+
+  .hero-visual{ position:relative; }
+  .stack-card{
+    background:var(--white); border-radius:22px; padding:24px 22px; box-shadow:0 24px 50px -20px rgba(45,27,61,0.25);
+    position:relative; z-index:2;
+  }
+  .stack-role-row{
+    display:flex; align-items:center; gap:12px; padding:12px 0; border-bottom:2px dashed var(--cream-dim);
+  }
+  .stack-role-row:last-child{ border-bottom:none; }
+  .role-dot{ width:38px; height:38px; border-radius:12px; display:flex; align-items:center; justify-content:center; font-family:var(--font-display); font-weight:700; font-size:15px; color:#fff; flex:none; }
+  .stack-role-name{ font-weight:700; font-size:14.5px; }
+  .stack-role-detail{ font-size:12px; color:var(--plum-dim); }
+  .stack-badge{ margin-left:auto; background:var(--grass); color:#fff; font-size:11px; font-weight:700; padding:4px 10px; border-radius:999px; }
+
+  /* ---------- Stat strip ---------- */
+  .stats{ background:var(--plum); padding:52px 0; }
+  .stats-grid{ display:grid; grid-template-columns:repeat(4,1fr); gap:24px; text-align:center; }
+  @media (max-width:760px){ .stats-grid{ grid-template-columns:1fr 1fr; } }
+  .stat-num{ font-family:var(--font-display); font-weight:700; font-size:clamp(32px,4vw,46px); color:var(--sun); }
+  .stat-label{ color:#C7B9D4; font-size:13.5px; font-weight:600; margin-top:6px; }
+
+  /* ---------- Features ---------- */
+  .features{ padding:100px 0 80px; }
+  .features-head{ text-align:center; max-width:56ch; margin:0 auto 60px; }
+  .features-head h2{ font-family:var(--font-display); font-weight:700; font-size:clamp(28px,3.4vw,38px); margin-bottom:14px; }
+  .features-head p{ color:var(--plum-dim); font-size:17px; }
+
+  .feature-grid{ display:grid; grid-template-columns:repeat(2,1fr); gap:26px; }
+  @media (max-width:760px){ .feature-grid{ grid-template-columns:1fr; } }
+  .feature-card{
+    border-radius:24px; padding:32px 30px; transition:transform 0.25s cubic-bezier(.2,.9,.3,1.3);
+  }
+  .feature-card:hover{ transform:translateY(-6px) rotate(-0.6deg); }
+  .feature-card .fc-icon{
+    width:52px; height:52px; border-radius:16px; display:flex; align-items:center; justify-content:center;
+    font-size:24px; margin-bottom:18px;
+  }
+  .feature-card h3{ font-family:var(--font-display); font-weight:700; font-size:21px; margin-bottom:10px; }
+  .feature-card p{ color:var(--plum-dim); font-size:14.5px; line-height:1.65; }
+
+  /* ---------- Roles ---------- */
+  .roles-section{ background:var(--plum); padding:100px 0; position:relative; overflow:hidden; }
+  .roles-head{ text-align:center; max-width:56ch; margin:0 auto 56px; position:relative; z-index:2; }
+  .roles-head h2{ font-family:var(--font-display); font-weight:700; font-size:clamp(28px,3.4vw,38px); color:#fff; margin-bottom:14px; }
+  .roles-head p{ color:#C7B9D4; font-size:17px; }
+  .roles-grid{ display:grid; grid-template-columns:repeat(3,1fr); gap:18px; position:relative; z-index:2; }
+  @media (max-width:900px){ .roles-grid{ grid-template-columns:1fr 1fr; } }
+  @media (max-width:600px){ .roles-grid{ grid-template-columns:1fr; } }
+  .role-card{
+    background:rgba(255,255,255,0.06); border:1.5px solid rgba(255,255,255,0.12); border-radius:20px;
+    padding:26px 24px; transition:background 0.2s, transform 0.2s cubic-bezier(.2,.9,.3,1.3);
+  }
+  .role-card:hover{ background:rgba(255,255,255,0.1); transform:translateY(-4px); }
+  .role-card .rc-icon{ width:40px; height:40px; border-radius:12px; display:flex; align-items:center; justify-content:center; font-size:19px; margin-bottom:14px; }
+  .role-card h4{ font-family:var(--font-display); font-weight:700; font-size:17px; color:#fff; margin-bottom:8px; }
+  .role-card p{ color:#B7A8C4; font-size:13.5px; line-height:1.55; }
+  .roles-cta{ text-align:center; margin-top:48px; position:relative; z-index:2; }
+  .roles-cta p{ color:#C7B9D4; font-size:14.5px; margin-bottom:20px; }
+
+  /* ---------- Customization ---------- */
+  .custom-section{ padding:100px 0; }
+  .custom-inner{ display:grid; grid-template-columns:1fr 1fr; gap:60px; align-items:center; }
+  @media (max-width:860px){ .custom-inner{ grid-template-columns:1fr; gap:40px; } }
+  .custom-eyebrow{ display:inline-flex; background:var(--sun); color:var(--plum); font-weight:700; font-size:13px; padding:7px 15px; border-radius:999px; margin-bottom:18px; }
+  .custom-section h2{ font-family:var(--font-display); font-weight:700; font-size:clamp(26px,3.2vw,36px); margin-bottom:16px; }
+  .custom-section > .custom-inner > div:first-child > p{ color:var(--plum-dim); font-size:16px; line-height:1.7; margin-bottom:24px; }
+  .custom-check-list{ list-style:none; display:flex; flex-direction:column; gap:12px; }
+  .custom-check-list li{ display:flex; align-items:center; gap:10px; font-size:14.5px; font-weight:600; }
+  .custom-check-list svg{ flex:none; color:var(--grass); }
+
+  .skin-grid{ display:grid; grid-template-columns:1fr 1fr; gap:18px; }
+  .skin-card{ border-radius:18px; padding:18px; box-shadow:0 14px 30px -16px rgba(45,27,61,0.25); transition:transform 0.2s cubic-bezier(.2,.9,.3,1.3); }
+  .skin-card:hover{ transform:translateY(-4px); }
+  .skin-top{ display:flex; align-items:center; gap:8px; margin-bottom:14px; }
+  .skin-dot{ width:9px; height:9px; border-radius:50%; }
+  .skin-name{ font-family:var(--font-display); font-weight:700; font-size:13.5px; }
+  .skin-bar{ height:8px; border-radius:4px; margin-bottom:7px; }
+  .skin-bar:last-child{ margin-bottom:0; width:60%; }
+
+
+  /* ---------- Celebration banner ---------- */
+  .celebrate-banner{
+    background:var(--sun); border-radius:32px; margin:0 32px 90px; padding:56px 48px;
+    display:flex; align-items:center; justify-content:space-between; gap:40px; max-width:1096px; margin-left:auto; margin-right:auto;
+  }
+  @media (max-width:860px){ .celebrate-banner{ flex-direction:column; text-align:center; padding:40px 28px; margin:0 20px 70px; } }
+  .celebrate-banner img{ width:220px; flex:none; }
+  .celebrate-banner h3{ font-family:var(--font-display); font-weight:700; font-size:clamp(22px,2.6vw,30px); color:var(--plum); max-width:20ch; margin-bottom:10px; }
+  .celebrate-banner p{ color:#5C4A1F; font-size:15px; max-width:38ch; }
+
+  .who{ padding:100px 0; display:grid; grid-template-columns:1fr 1fr; gap:60px; align-items:center; }
+  @media (max-width:840px){ .who{ grid-template-columns:1fr; gap:36px; } }
+  .who h2{ font-family:var(--font-display); font-weight:700; font-size:clamp(28px,3.4vw,36px); margin-bottom:16px; }
+  .who > div > p{ color:var(--plum-dim); font-size:16px; line-height:1.7; }
+  .who-list{ list-style:none; display:flex; flex-direction:column; gap:14px; }
+  .who-item{
+    display:flex; align-items:center; gap:14px; background:var(--white); border-radius:16px;
+    padding:16px 18px; box-shadow:0 6px 18px -10px rgba(45,27,61,0.18);
+  }
+  .who-dot{ width:34px; height:34px; border-radius:10px; flex:none; display:flex; align-items:center; justify-content:center; color:#fff; font-weight:700; font-family:var(--font-display); font-size:13px; }
+  .who-item b{ font-size:14.5px; }
+  .who-item span{ display:block; font-size:12.5px; color:var(--plum-dim); }
+
+  /* ---------- Footer ---------- */
+  .footer{ background:var(--coral); padding:70px 0 40px; color:#fff; }
+  .footer-top{ display:flex; justify-content:space-between; align-items:flex-end; flex-wrap:wrap; gap:26px; margin-bottom:50px; }
+  .footer-top h2{ font-family:var(--font-display); font-weight:700; font-size:clamp(26px,3vw,32px); max-width:16ch; }
+  .footer-contact{ font-size:14.5px; line-height:2; }
+  .footer-contact img{ height:26px; margin-bottom:14px; filter:brightness(0) invert(1); }
+  .footer-bottom{
+    display:flex; justify-content:space-between; padding-top:26px; border-top:1.5px solid rgba(255,255,255,0.3);
+    font-size:13px; color:rgba(255,255,255,0.85); flex-wrap:wrap; gap:10px;
+  }
+</style>
+</head>
+<body>
+
+<div class="wrap nav">
+  <a href="index.html" class="wordmark"><img src="assets/nemsec-logo.png" alt="NEMSEC" />NEMSEC</a>
+  <div class="nav-links">
+    <a href="#features">Features</a>
+    <a href="#roles">Who it's for</a>
+    <a href="#contact">Contact</a>
+  </div>
+  <a class="btn btn-coral" href="sign-in.html">Live Demo</a>
+</div>
+
+<div class="hero">
+  <svg class="floaty" style="top:100px; left:6%; width:44px;" viewBox="0 0 24 24" fill="none" stroke="var(--sun)" stroke-width="2.5"><path d="M12 20h9M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"/></svg>
+  <svg class="floaty" style="top:220px; left:2%; width:34px; animation-delay:1s;" viewBox="0 0 24 24" fill="var(--sky)"><path d="M12 2l2.9 6.6 7.1.6-5.4 4.7 1.6 7-6.2-3.8-6.2 3.8 1.6-7L2 9.2l7.1-.6z"/></svg>
+  <svg class="floaty" style="top:60px; right:8%; width:38px; animation-delay:2s;" viewBox="0 0 24 24" fill="none" stroke="var(--grass)" stroke-width="2.5"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/></svg>
+  <svg class="floaty" style="bottom:60px; right:2%; width:30px; animation-delay:1.6s;" viewBox="0 0 24 24" fill="var(--coral)"><circle cx="12" cy="12" r="10"/></svg>
+
+  <div class="wrap hero-inner">
+    <div>
+      <div class="hero-eyebrow">🎓 School Management, Reimagined</div>
+      <h1>Run your <span class="hl">whole school</span>, without losing a single record.</h1>
+      <p>Admissions, attendance, grading, report cards, and fees — one connected platform NEMSEC built for how a school actually runs, from Creche through SS3.</p>
+      <div class="hero-actions">
+        <a class="btn btn-coral" href="sign-in.html">Live Demo</a>
+        <a class="btn btn-outline" href="#contact">Talk to us</a>
+      </div>
+    </div>
+    <div class="hero-visual reveal">
+      <div class="stack-card">
+        <div class="stack-role-row">
+          <div class="role-dot" style="background:var(--coral);">MA</div>
+          <div><div class="stack-role-name">Master Administrator</div><div class="stack-role-detail">Full oversight, every record</div></div>
+          <div class="stack-badge">Active</div>
+        </div>
+        <div class="stack-role-row">
+          <div class="role-dot" style="background:var(--sky);">CT</div>
+          <div><div class="stack-role-name">Class Teacher</div><div class="stack-role-detail">Attendance &amp; report cards</div></div>
+          <div class="stack-badge">Active</div>
+        </div>
+        <div class="stack-role-row">
+          <div class="role-dot" style="background:var(--grass);">PA</div>
+          <div><div class="stack-role-name">Parent</div><div class="stack-role-detail">Their child's record only</div></div>
+          <div class="stack-badge">Active</div>
+        </div>
+        <div class="stack-role-row">
+          <div class="role-dot" style="background:var(--sun);">ST</div>
+          <div><div class="stack-role-name">Student</div><div class="stack-role-detail">Their own classes &amp; results</div></div>
+          <div class="stack-badge">Active</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="stats">
+  <div class="wrap stats-grid">
+    <div class="reveal"><div class="stat-num" data-count="9">0</div><div class="stat-label">Roles, one system</div></div>
+    <div class="reveal"><div class="stat-num" data-count="15">0</div><div class="stat-label">Levels, Creche to SS3</div></div>
+    <div class="reveal"><div class="stat-num" data-count="100" data-suffix="%">0</div><div class="stat-label">Fee &amp; grade automation</div></div>
+    <div class="reveal"><div class="stat-num" data-count="1">0</div><div class="stat-label">Record, kept correctly</div></div>
+  </div>
+</div>
+
+<div class="wrap features" id="features">
+  <div class="features-head reveal">
+    <h2>Built around what a school actually does</h2>
+    <p>Not a generic form-builder adapted for education — every part of this platform is built around how admissions, classrooms, and fees really work.</p>
+  </div>
+  <div class="feature-grid">
+    <div class="feature-card reveal" style="background:#FFE9E2;">
+      <div class="fc-icon" style="background:var(--coral); color:#fff;">📋</div>
+      <h3>Admissions</h3>
+      <p>Applicants apply online, sit a timed entrance exam matched to the exact class they applied for, and the school decides when ready.</p>
+    </div>
+    <div class="feature-card reveal" style="background:#E3F3FF;">
+      <div class="fc-icon" style="background:var(--sky); color:#fff;">📚</div>
+      <h3>Classrooms</h3>
+      <p>Attendance and continuous assessment recorded once — visible to the student and parent immediately, not just at report card time.</p>
+    </div>
+    <div class="feature-card reveal" style="background:#FFF6DA;">
+      <div class="fc-icon" style="background:var(--sun); color:var(--plum);">🏆</div>
+      <h3>Report cards</h3>
+      <p>Grades compute themselves, and promotion happens automatically at the start of a new session for students who earned it.</p>
+    </div>
+    <div class="feature-card reveal" style="background:#E1F5EA;">
+      <div class="fc-icon" style="background:var(--grass); color:#fff;">💳</div>
+      <h3>Fees</h3>
+      <p>A bill set once for a class applies automatically, even to a student admitted afterward — and parents can pay directly online.</p>
+    </div>
+  </div>
+</div>
+
+<div class="roles-section" id="roles">
+  <svg class="floaty" style="top:40px; left:4%; width:36px; animation-delay:0.5s;" viewBox="0 0 24 24" fill="var(--sun)"><circle cx="12" cy="12" r="10"/></svg>
+  <svg class="floaty" style="bottom:50px; right:6%; width:30px; animation-delay:1.4s;" viewBox="0 0 24 24" fill="var(--sky)"><circle cx="12" cy="12" r="10"/></svg>
+  <div class="wrap">
+    <div class="roles-head reveal">
+      <h2>Built for the whole school, not just the office</h2>
+      <p>Nine distinct roles, each with their own dashboard, built around what that person actually needs to do.</p>
+    </div>
+    <div class="roles-grid">
+      <div class="role-card reveal"><div class="rc-icon" style="background:var(--coral);">👑</div><h4>Master Administrator</h4><p>Final authority across every record and every other role.</p></div>
+      <div class="role-card reveal"><div class="rc-icon" style="background:var(--sky);">🗂️</div><h4>Administrator</h4><p>Day-to-day operations — admissions, staff, and academics.</p></div>
+      <div class="role-card reveal"><div class="rc-icon" style="background:var(--grass);">✏️</div><h4>Teacher</h4><p>Attendance and scores for their own subjects and classes.</p></div>
+      <div class="role-card reveal"><div class="rc-icon" style="background:var(--sun);">📗</div><h4>Class Teacher</h4><p>Everything a teacher has, plus compiling report cards.</p></div>
+      <div class="role-card reveal"><div class="rc-icon" style="background:var(--coral);">💰</div><h4>Finance Officer</h4><p>Billing, fee templates, and every student's ledger.</p></div>
+      <div class="role-card reveal"><div class="rc-icon" style="background:var(--sky);">🛠️</div><h4>IT Officer</h4><p>Account access, recovery, and system health.</p></div>
+      <div class="role-card reveal"><div class="rc-icon" style="background:var(--grass);">📥</div><h4>Admissions Officer</h4><p>The full applicant pipeline, exams, and decisions.</p></div>
+      <div class="role-card reveal"><div class="rc-icon" style="background:var(--sun);">👪</div><h4>Parent</h4><p>Their own child's record — attendance, grades, and fees.</p></div>
+      <div class="role-card reveal"><div class="rc-icon" style="background:var(--coral);">🎒</div><h4>Student</h4><p>Their own classes, scores, and report cards.</p></div>
+    </div>
+    <div class="roles-cta reveal">
+      <p>We'll provide sign-in details for the role you'd like to explore.</p>
+      <a class="btn btn-coral" href="sign-in.html">Live Demo</a>
+    </div>
+  </div>
+</div>
+
+<div class="custom-section">
+  <div class="wrap custom-inner">
+    <div class="reveal">
+      <div class="custom-eyebrow">Made yours</div>
+      <h2>Fully customized to your school's own identity</h2>
+      <p>This isn't a one-size-fits-all template. NEMSEC skins the platform in your school's own colors, crest, and name — modern and professional, but recognizably <em>yours</em> from the moment staff and parents sign in.</p>
+      <ul class="custom-check-list">
+        <li><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6L9 17l-5-5"/></svg> Your school's colors and crest throughout</li>
+        <li><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6L9 17l-5-5"/></svg> Your own domain and sign-in page</li>
+        <li><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6L9 17l-5-5"/></svg> The same modern, professional platform underneath</li>
+      </ul>
+    </div>
+    <div class="skin-grid reveal">
+      <div class="skin-card" style="background:#EAF2FF;">
+        <div class="skin-top"><div class="skin-dot" style="background:#1E56C7;"></div><div class="skin-name" style="color:#1E3A6E;">Bright Horizon Academy</div></div>
+        <div class="skin-bar" style="background:#1E56C7; width:85%;"></div>
+        <div class="skin-bar" style="background:#B9CCEF;"></div>
+      </div>
+      <div class="skin-card" style="background:#FCEFE3;">
+        <div class="skin-top"><div class="skin-dot" style="background:#C7621E;"></div><div class="skin-name" style="color:#6E3A1E;">Kings Court College</div></div>
+        <div class="skin-bar" style="background:#C7621E; width:85%;"></div>
+        <div class="skin-bar" style="background:#EFCCB9;"></div>
+      </div>
+      <div class="skin-card" style="background:#E9F7EE;">
+        <div class="skin-top"><div class="skin-dot" style="background:#1E8A4C;"></div><div class="skin-name" style="color:#1E4E30;">Grovewood International</div></div>
+        <div class="skin-bar" style="background:#1E8A4C; width:85%;"></div>
+        <div class="skin-bar" style="background:#B9E4CB;"></div>
+      </div>
+      <div class="skin-card" style="background:#F5EAFB;">
+        <div class="skin-top"><div class="skin-dot" style="background:#7A2EC7;"></div><div class="skin-name" style="color:#451A70;">St. Augustine's Schools</div></div>
+        <div class="skin-bar" style="background:#7A2EC7; width:85%;"></div>
+        <div class="skin-bar" style="background:#D9BFEF;"></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="celebrate-banner reveal">
+  <img src="assets/students-celebrating-transparent.png" alt="" />
+  <div>
+    <h3>Built for the moments that matter to a school</h3>
+    <p>Behind every record is a real student, a real family, and a real result worth getting right.</p>
+  </div>
+</div>
+
+<div class="wrap who">
+  <div class="reveal">
+    <h2>Built for schools of any size</h2>
+    <p>NEMSEC built this for a real, operating school first — not adapted from a generic template afterward. It scales from a single-stream primary school to a full Creche-through-SS3 institution.</p>
+  </div>
+  <ul class="who-list reveal">
+    <li class="who-item"><div class="who-dot" style="background:var(--coral);">C</div><div><b>Creche &amp; Nursery</b><span>Early years, kept just as carefully as senior classes</span></div></li>
+    <li class="who-item"><div class="who-dot" style="background:var(--sky);">P</div><div><b>Primary</b><span>Attendance, assessment, and report cards for younger learners</span></div></li>
+    <li class="who-item"><div class="who-dot" style="background:var(--grass);">S</div><div><b>Junior &amp; Senior Secondary</b><span>Subject-level grading, WAEC-style bands, and promotion</span></div></li>
+  </ul>
+</div>
+
+<div class="footer" id="contact">
+  <div class="wrap">
+    <div class="footer-top">
+      <h2>Ready to see it running your own school's data?</h2>
+      <a class="btn" style="background:#fff; color:var(--coral-dark);" href="mailto:hello@nemsec.com.ng">Request a demo</a>
+    </div>
+    <div class="footer-contact">
+      <img src="assets/nemsec-logo.png" alt="NEMSEC" />
+      <b>NEMSEC</b><br />
+      hello@nemsec.com.ng
+    </div>
+    <div class="footer-bottom">
+      <span>© 2026 <a href="https://nemsec.com.ng" target="_blank" rel="noopener" style="color:inherit; text-decoration:underline;">NEMSEC</a>. All rights reserved.</span>
+      <span>This is a demonstration site with sample data — not a real school.</span>
+    </div>
+  </div>
+</div>
+
+<script>
+// Reveal-on-scroll
+const revealEls = document.querySelectorAll('.reveal');
+const io = new IntersectionObserver((entries) => {
+  entries.forEach(e => { if (e.isIntersecting) { e.target.classList.add('in'); io.unobserve(e.target); } });
+}, { threshold: 0.15 });
+revealEls.forEach(el => io.observe(el));
+
+// Count-up stats
+const statEls = document.querySelectorAll('.stat-num');
+const statIO = new IntersectionObserver((entries) => {
+  entries.forEach(e => {
+    if (!e.isIntersecting) return;
+    const el = e.target;
+    const target = Number(el.dataset.count);
+    const suffix = el.dataset.suffix || '';
+    const duration = 900;
+    const start = performance.now();
+    function tick(now){
+      const p = Math.min((now - start) / duration, 1);
+      const eased = 1 - Math.pow(1 - p, 3);
+      el.textContent = Math.round(eased * target) + suffix;
+      if (p < 1) requestAnimationFrame(tick);
+    }
+    requestAnimationFrame(tick);
+    statIO.unobserve(el);
+  });
+}, { threshold: 0.5 });
+statEls.forEach(el => statIO.observe(el));
+</script>
+
+</body>
+</html>

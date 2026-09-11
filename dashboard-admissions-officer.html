@@ -1,0 +1,341 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<script>
+(function(){
+  if (sessionStorage.getItem('nemsec_demo_dashboard') !== 'dashboard-admissions-officer.html') {
+    window.location.replace('sign-in.html');
+  }
+})();
+</script>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Admissions Officer — NEMSEC Demo</title>
+<meta name="robots" content="noindex, nofollow" />
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Sora:wght@500;600;700;800&family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --cream: #FFF8EC; --plum: #2D1B3D; --plum-dim: #6B5A7A; --plum-faint:#A599B2;
+    --coral: #FF6B4A; --coral-dark: #E5502F; --sun: #FFC93C; --grass: #3CB878; --sky:#4AB8FF;
+    --border:#EAE2D4; --card:#FFFFFF;
+    --font-display: 'Sora', sans-serif; --font-body: 'Manrope', sans-serif;
+  }
+  *{ box-sizing:border-box; margin:0; padding:0; }
+  body{ font-family:var(--font-body); background:var(--cream); color:var(--plum); font-size:14px; }
+  button{ font-family:inherit; cursor:pointer; }
+
+  .shell{ display:flex; min-height:100vh; }
+
+  /* ---------- Sidebar ---------- */
+  .sidebar{ width:250px; flex:none; background:var(--plum); color:#fff; display:flex; flex-direction:column; padding:22px 16px; }
+  .side-brand{ display:flex; align-items:center; gap:10px; padding:0 8px 22px; border-bottom:1px solid rgba(255,255,255,0.12); margin-bottom:18px; }
+  .side-brand img{ height:22px; filter:brightness(0) invert(1); }
+  .side-brand .school{ font-family:var(--font-display); font-weight:700; font-size:13.5px; }
+  .side-brand .system{ font-size:10.5px; color:#B7A8C4; }
+  .nav-label-group{ font-size:10.5px; font-weight:700; color:#8B7A9C; text-transform:uppercase; letter-spacing:0.05em; padding:14px 10px 6px; }
+  .nav-item{
+    display:flex; align-items:center; gap:10px; width:100%; padding:9px 10px; border-radius:9px;
+    border:none; background:none; color:#D9CFE3; font-size:13px; font-weight:600; text-align:left; margin-bottom:2px;
+  }
+  .nav-item svg{ width:16px; height:16px; flex:none; }
+  .nav-item:hover{ background:rgba(255,255,255,0.07); color:#fff; }
+  .nav-item.active{ background:var(--coral); color:#fff; }
+  .side-foot{ margin-top:auto; display:flex; align-items:center; gap:10px; padding:14px 8px 0; border-top:1px solid rgba(255,255,255,0.12); }
+  .side-avatar{ width:34px; height:34px; border-radius:9px; background:var(--coral); display:flex; align-items:center; justify-content:center; font-family:var(--font-display); font-weight:700; font-size:13px; flex:none; }
+  .side-who-name{ font-size:13px; font-weight:700; }
+  .side-who-role{ font-size:11px; color:#B7A8C4; }
+  .signout-btn{ margin-top:12px; width:100%; padding:9px 10px; border-radius:9px; border:1px solid rgba(255,255,255,0.14); background:none; color:#D9CFE3; font-size:12px; font-weight:700; text-align:left; }
+  .signout-btn:hover{ background:rgba(255,255,255,0.08); color:#fff; }
+
+  /* ---------- Main ---------- */
+  .main{ flex:1; min-width:0; }
+  .topbar{
+    background:var(--card); border-bottom:1px solid var(--border); padding:16px 32px;
+    display:flex; align-items:center; justify-content:space-between; position:sticky; top:0; z-index:5;
+  }
+  .topbar h1{ font-family:var(--font-display); font-weight:700; font-size:19px; }
+  .topbar .sub{ font-size:12.5px; color:var(--plum-dim); }
+  .demo-pill{ background:var(--sun); color:#5C4A1F; font-size:11.5px; font-weight:700; padding:5px 12px; border-radius:999px; }
+  .content{ padding:28px 32px 60px; }
+
+  /* ---------- Stat cards ---------- */
+  .stat-grid{ display:grid; grid-template-columns:repeat(4,1fr); gap:16px; margin-bottom:28px; }
+  @media (max-width:1000px){ .stat-grid{ grid-template-columns:1fr 1fr; } }
+  .stat-card{ background:var(--card); border:1px solid var(--border); border-radius:14px; padding:20px; }
+  .stat-card .icon{ width:34px; height:34px; border-radius:10px; display:flex; align-items:center; justify-content:center; margin-bottom:14px; }
+  .stat-card .num{ font-family:var(--font-display); font-weight:700; font-size:26px; }
+  .stat-card .label{ font-size:12.5px; color:var(--plum-dim); margin-top:2px; }
+  .stat-card .delta{ font-size:11.5px; font-weight:700; margin-top:8px; }
+  .stat-card .delta.up{ color:var(--grass); }
+
+  /* ---------- Panels ---------- */
+  .panel-grid{ display:grid; grid-template-columns:1.4fr 1fr; gap:20px; }
+  @media (max-width:980px){ .panel-grid{ grid-template-columns:1fr; } }
+  .panel{ background:var(--card); border:1px solid var(--border); border-radius:14px; padding:22px; margin-bottom:20px; }
+  .panel-head{ display:flex; align-items:center; justify-content:space-between; margin-bottom:16px; }
+  .panel-head h3{ font-family:var(--font-display); font-weight:700; font-size:15px; }
+  .panel-head a{ font-size:12.5px; font-weight:700; color:var(--coral-dark); text-decoration:none; }
+
+  table{ width:100%; border-collapse:collapse; font-size:13px; }
+  th{ text-align:left; font-size:11px; text-transform:uppercase; letter-spacing:0.04em; color:var(--plum-faint); padding:8px 10px; border-bottom:1.5px solid var(--border); }
+  td{ padding:11px 10px; border-bottom:1px solid var(--border); }
+  tr:last-child td{ border-bottom:none; }
+  .badge{ display:inline-flex; font-size:11px; font-weight:700; padding:4px 10px; border-radius:999px; }
+  .badge.green{ background:#E1F5EA; color:#1E7A48; }
+  .badge.yellow{ background:#FFF6DA; color:#8A6D0F; }
+  .badge.red{ background:#FBE6E3; color:#B23A22; }
+  .badge.blue{ background:#E3F3FF; color:#1D6FA8; }
+  .badge.gray{ background:#EFEAF2; color:var(--plum-dim); }
+
+  .activity-row{ display:flex; gap:12px; padding:12px 0; border-bottom:1px solid var(--border); }
+  .activity-row:last-child{ border-bottom:none; }
+  .activity-dot{ width:8px; height:8px; border-radius:50%; margin-top:6px; flex:none; }
+  .activity-text{ font-size:13px; }
+  .activity-text b{ font-weight:700; }
+  .activity-time{ font-size:11.5px; color:var(--plum-faint); margin-top:2px; }
+
+  .page{ display:none; }
+  .page.active{ display:block; }
+
+  .search-row{ display:flex; gap:10px; margin-bottom:18px; }
+  .search-row input{ flex:1; padding:10px 14px; border:1.5px solid var(--border); border-radius:9px; font-family:inherit; font-size:13px; }
+  .search-row select{ padding:10px 14px; border:1.5px solid var(--border); border-radius:9px; font-family:inherit; font-size:13px; background:#fff; }
+
+  .readonly-note{ display:flex; align-items:center; gap:8px; background:#EFEAF2; color:var(--plum-dim); font-size:12.5px; font-weight:600; padding:10px 14px; border-radius:10px; margin-bottom:18px; }
+  .readonly-note svg{ width:15px; height:15px; flex:none; }
+
+  /* ---------- Kanban board ---------- */
+  .kanban{ display:grid; grid-template-columns:repeat(4,1fr); gap:16px; align-items:start; }
+  @media (max-width:1100px){ .kanban{ grid-template-columns:1fr 1fr; } }
+  .kanban-col{ background:var(--cream); border-radius:12px; padding:14px; }
+  .kanban-col-head{ display:flex; align-items:center; justify-content:space-between; margin-bottom:12px; padding:0 2px; }
+  .kanban-col-head h4{ font-size:12.5px; font-weight:700; text-transform:uppercase; letter-spacing:0.03em; }
+  .kanban-count{ background:#fff; border-radius:999px; font-size:11px; font-weight:700; padding:2px 9px; color:var(--plum-dim); }
+  .kanban-card{ background:#fff; border-radius:10px; padding:12px 14px; margin-bottom:10px; box-shadow:0 3px 10px -6px rgba(45,27,61,0.18); }
+  .kanban-card:last-child{ margin-bottom:0; }
+  .kanban-card .name{ font-size:13px; font-weight:700; margin-bottom:3px; }
+  .kanban-card .meta{ font-size:11.5px; color:var(--plum-dim); }
+  .kanban-col.submitted .kanban-col-head h4{ color:var(--plum-dim); }
+  .kanban-col.exam .kanban-col-head h4{ color:#8A6D0F; }
+  .kanban-col.review .kanban-col-head h4{ color:#1D6FA8; }
+  .kanban-col.decided .kanban-col-head h4{ color:#1E7A48; }
+</style>
+</head>
+<body>
+
+<div class="shell">
+  <aside class="sidebar">
+    <div class="side-brand">
+      <img src="assets/nemsec-logo.png" alt="" />
+      <div>
+        <div class="school">GREENFIELD ACADEMY</div>
+        <a href="https://nemsec.com.ng" target="_blank" rel="noopener" class="system" style="color:inherit; text-decoration:none;">NEMSEC SMIS</a>
+      </div>
+    </div>
+
+    <nav>
+      <div class="nav-label-group">Overview</div>
+      <button class="nav-item active" data-page="overview">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="9" rx="1.5"/><rect x="14" y="3" width="7" height="5" rx="1.5"/><rect x="14" y="12" width="7" height="9" rx="1.5"/><rect x="3" y="16" width="7" height="5" rx="1.5"/></svg>
+        Dashboard
+      </button>
+
+      <div class="nav-label-group">Admissions</div>
+      <button class="nav-item" data-page="pipeline">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg>
+        Application Pipeline
+      </button>
+
+      <div class="nav-label-group">People</div>
+      <button class="nav-item" data-page="lookup">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="7"/><path d="M21 21l-4.3-4.3"/></svg>
+        Student Lookup
+      </button>
+    </nav>
+
+    <div class="side-foot">
+      <div class="side-avatar">CO</div>
+      <div>
+        <div class="side-who-name">Chidi Onyekachi</div>
+        <div class="side-who-role">Admissions Officer</div>
+      </div>
+      <button class="signout-btn" id="signOutBtn">Sign Out</button>
+    </div>
+  </aside>
+
+  <div class="main">
+    <div class="topbar">
+      <div>
+        <h1 id="pageTitle">Dashboard Overview</h1>
+        <div class="sub">Greenfield Academy · 2026/2027 Session</div>
+      </div>
+      <div class="demo-pill">Demo data — not a real school</div>
+    </div>
+
+    <div class="content">
+
+      <!-- ============ OVERVIEW ============ -->
+      <section class="page active" id="page-overview">
+        <div class="stat-grid">
+          <div class="stat-card">
+            <div class="icon" style="background:#FFF6DA;"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="#8A6D0F" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round"><path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg></div>
+            <div class="num">27</div>
+            <div class="label">Pending Applications</div>
+            <div class="delta" style="color:var(--plum-faint);">9 awaiting exam</div>
+          </div>
+          <div class="stat-card">
+            <div class="icon" style="background:#E3F3FF;"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="#1D6FA8" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 3"/></svg></div>
+            <div class="num">6</div>
+            <div class="label">Exams Scheduled</div>
+            <div class="delta" style="color:var(--plum-faint);">this week</div>
+          </div>
+          <div class="stat-card">
+            <div class="icon" style="background:#E1F5EA;"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="#1E7A48" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round"><path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg></div>
+            <div class="num">6</div>
+            <div class="label">Admitted This Term</div>
+            <div class="delta up">↑ 2 this week</div>
+          </div>
+          <div class="stat-card">
+            <div class="icon" style="background:#FBE6E3;"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="var(--coral-dark)" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><line x1="15" y1="9" x2="9" y2="15"/><line x1="9" y1="9" x2="15" y2="15"/></svg></div>
+            <div class="num">1</div>
+            <div class="label">Declined This Term</div>
+            <div class="delta" style="color:var(--plum-faint);">eligible to reapply in 24h</div>
+          </div>
+        </div>
+
+        <div class="panel-grid">
+          <div>
+            <div class="panel">
+              <div class="panel-head"><h3>Recent Activity</h3></div>
+              <div class="activity-row">
+                <div class="activity-dot" style="background:var(--grass);"></div>
+                <div>
+                  <div class="activity-text"><b>Amara Eze</b> was admitted into KG1</div>
+                  <div class="activity-time">32 minutes ago</div>
+                </div>
+              </div>
+              <div class="activity-row">
+                <div class="activity-dot" style="background:var(--sky);"></div>
+                <div>
+                  <div class="activity-text">Entrance exam scored for <b>David Okafor</b> — 78%</div>
+                  <div class="activity-time">2 hours ago</div>
+                </div>
+              </div>
+              <div class="activity-row">
+                <div class="activity-dot" style="background:var(--sun);"></div>
+                <div>
+                  <div class="activity-text">New application received from <b>Ngozi Ekwueme</b></div>
+                  <div class="activity-time">Yesterday, 4:50 PM</div>
+                </div>
+              </div>
+              <div class="activity-row">
+                <div class="activity-dot" style="background:var(--coral);"></div>
+                <div>
+                  <div class="activity-text"><b>Emeka Obi</b>'s application was declined</div>
+                  <div class="activity-time">Yesterday, 2:10 PM</div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div>
+            <div class="panel">
+              <div class="panel-head"><h3>This Week</h3></div>
+              <div class="activity-row"><div class="activity-dot" style="background:var(--grass);"></div><div class="activity-text">6 new applications received</div></div>
+              <div class="activity-row"><div class="activity-dot" style="background:var(--sky);"></div><div class="activity-text">3 entrance exams scheduled</div></div>
+              <div class="activity-row"><div class="activity-dot" style="background:var(--sun);"></div><div class="activity-text">2 admission decisions recorded</div></div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ============ APPLICATION PIPELINE ============ -->
+      <section class="page" id="page-pipeline">
+        <div class="kanban">
+          <div class="kanban-col submitted">
+            <div class="kanban-col-head"><h4>Submitted</h4><span class="kanban-count">9</span></div>
+            <div class="kanban-card"><div class="name">Ngozi Ekwueme</div><div class="meta">Grade 2 · 3 Sep 2026</div></div>
+            <div class="kanban-card"><div class="name">Yusuf Danjuma</div><div class="meta">JSS1 · 3 Sep 2026</div></div>
+            <div class="kanban-card"><div class="name">Precious Etim</div><div class="meta">KG2 · 2 Sep 2026</div></div>
+            <div class="kanban-card"><div class="name">Chukwuemeka Nnaji</div><div class="meta">Nursery 1 · 2 Sep 2026</div></div>
+          </div>
+          <div class="kanban-col exam">
+            <div class="kanban-col-head"><h4>Exam Scheduled</h4><span class="kanban-count">6</span></div>
+            <div class="kanban-card"><div class="name">Ifeoma Chukwu</div><div class="meta">JSS1 · 2 Sep 2026, 10:00 AM</div></div>
+            <div class="kanban-card"><div class="name">Grace Effiong</div><div class="meta">Nursery 2 · 5 Sep 2026, 9:00 AM</div></div>
+            <div class="kanban-card"><div class="name">Michael Osei</div><div class="meta">SS1 · 5 Sep 2026, 11:00 AM</div></div>
+          </div>
+          <div class="kanban-col review">
+            <div class="kanban-col-head"><h4>Under Review</h4><span class="kanban-count">8</span></div>
+            <div class="kanban-card"><div class="name">David Okafor</div><div class="meta">Grade 3 · Exam scored 78%</div></div>
+            <div class="kanban-card"><div class="name">Tunde Bakare</div><div class="meta">SS2 · Exam scored 65%</div></div>
+            <div class="kanban-card"><div class="name">Samuel Adeoye</div><div class="meta">SS1 · Exam scored 71%</div></div>
+          </div>
+          <div class="kanban-col decided">
+            <div class="kanban-col-head"><h4>Decided</h4><span class="kanban-count">4</span></div>
+            <div class="kanban-card"><div class="name">Amara Eze</div><div class="meta">KG1 · <span class="badge green">Admitted</span></div></div>
+            <div class="kanban-card"><div class="name">Halima Bello</div><div class="meta">Grade 1 · <span class="badge green">Admitted</span></div></div>
+            <div class="kanban-card"><div class="name">Emeka Obi</div><div class="meta">JSS3 · <span class="badge red">Declined</span></div></div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ============ STUDENT LOOKUP (read-only) ============ -->
+      <section class="page" id="page-lookup">
+        <div class="readonly-note">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="10" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+          Read-only — Admissions Officers can look up student records but can't edit them.
+        </div>
+        <div class="search-row">
+          <input type="text" placeholder="Search students by name or admission number..." />
+          <select><option>All Classes</option><option>JSS1</option><option>JSS2</option><option>Grade 3</option></select>
+        </div>
+        <div class="panel">
+          <table>
+            <thead><tr><th>Name</th><th>Admission No.</th><th>Class</th><th>Status</th></tr></thead>
+            <tbody>
+              <tr><td>Chiamaka Nweke</td><td>GFA/2026/0412</td><td>JSS2</td><td><span class="badge green">Active</span></td></tr>
+              <tr><td>Tobi Adeyemi</td><td>GFA/2024/0198</td><td>Grade 5</td><td><span class="badge green">Active</span></td></tr>
+              <tr><td>Blessing Okon</td><td>GFA/2026/0413</td><td>KG2</td><td><span class="badge green">Active</span></td></tr>
+              <tr><td>Fatima Abubakar</td><td>GFA/2023/0087</td><td>SS3</td><td><span class="badge green">Active</span></td></tr>
+              <tr><td>Kelechi Igwe</td><td>GFA/2025/0301</td><td>JSS1</td><td><span class="badge green">Active</span></td></tr>
+              <tr><td>Zainab Suleiman</td><td>GFA/2022/0044</td><td>SS2</td><td><span class="badge yellow">On Leave</span></td></tr>
+            </tbody>
+          </table>
+        </div>
+      </section>
+
+      <div style="margin-top:36px; padding-top:20px; border-top:1px solid var(--border); font-size:12px; color:var(--plum-faint);">
+        © 2026 <a href="https://nemsec.com.ng" target="_blank" rel="noopener" style="color:inherit; text-decoration:underline;">NEMSEC</a>. All rights reserved. This is a demonstration site with sample data — not a real school.
+      </div>
+
+    </div>
+  </div>
+</div>
+
+<script>
+document.querySelectorAll('.nav-item[data-page]').forEach(btn => {
+  btn.addEventListener('click', () => {
+    document.querySelectorAll('.nav-item[data-page]').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+    document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+    document.getElementById('page-' + btn.dataset.page).classList.add('active');
+    const titles = {
+      overview: 'Dashboard Overview', pipeline: 'Application Pipeline',
+      lookup: 'Student Lookup',
+    };
+    document.getElementById('pageTitle').textContent = titles[btn.dataset.page];
+  });
+});
+
+document.getElementById('signOutBtn').addEventListener('click', () => {
+  sessionStorage.removeItem('nemsec_demo_role');
+  sessionStorage.removeItem('nemsec_demo_dashboard');
+  window.location.href = 'sign-in.html';
+});
+</script>
+
+</body>
+</html>
